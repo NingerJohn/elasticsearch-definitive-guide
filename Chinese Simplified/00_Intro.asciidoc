@@ -1,28 +1,41 @@
-[[identifying-words]]
-== Identifying Words
+[[language-intro]]
+== Getting Started with Languages
 
-A word in English is relatively simple to spot: words are separated by
-whitespace or (some) punctuation.((("languages", "identifyig words")))((("words", "identifying"))) Even in English, though, there can be
-controversy: is _you're_ one word or two? What about _o'clock_,
-_cooperate_, _half-baked_, or _eyewitness_?
+Elasticsearch ships with a collection of language analyzers that provide
+good, basic, {ref}/analysis-lang-analyzer.html[out-of-the-box support]
+for many of the world's most common languages.
 
-Languages like German or Dutch combine individual words to create longer
-compound words like _Weißkopfseeadler_ (white-headed sea eagle), but in order
-to be able to return `Weißkopfseeadler` as a result for the query `Adler`
-(eagle), we need to understand how to break up compound words into their
-constituent parts.
+These analyzers typically perform four roles:
 
-Asian languages are even more complex: some have no whitespace between words,
-sentences, or even paragraphs.((("Asian languages", "identifying words"))) Some words can be represented by a single
-character, but the same single character, when placed next to other
-characters, can form just one part of a longer word with a quite different
-meaning.
+* Tokenize text into individual words:
++
+`The quick brown foxes` -> [`The`, `quick`, `brown`, `foxes`]
 
-It should be obvious that there is no silver-bullet analyzer that will
-miraculously deal with all human languages. Elasticsearch ships with dedicated
-analyzers for many languages, and more language-specific analyzers are
-available as plug-ins.
+* Lowercase tokens:
++
+`The` -> `the`
 
-However, not all languages have dedicated analyzers, and sometimes you won't
-even be sure which language(s) you are dealing with.  For these situations, we
-need good standard tools that do a reasonable job regardless of language.
+* Remove common _stopwords_:
++
+&#91;`The`, `quick`, `brown`, `foxes`] -> [`quick`, `brown`, `foxes`]
+
+* Stem tokens to their root form:
++
+`foxes` -> `fox`
+
+Each analyzer may also apply other transformations specific to its language in
+order to make words from that language more searchable:
+
+* The `english` analyzer removes the possessive `'s`:
++
+`John's` -> `john`
+
+* The `french` analyzer removes _elisions_ like `l'` and `qu'` and
+  _diacritics_ like `¨` or `^`:
++
+`l'église` -> `eglis`
+
+* The `german` analyzer normalizes terms, replacing `ä` and `ae` with `a`, or
+  `ß` with `ss`, among others:
++
+`äußerst` -> `ausserst`
