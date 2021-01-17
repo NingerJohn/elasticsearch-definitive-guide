@@ -1,45 +1,38 @@
-[[partial-matching]]
-== Partial Matching
+[[proximity-matching]]
+== Proximity Matching
 
-A keen observer will notice  that all the queries so far in this book have
-operated on whole terms.((("partial matching")))  To match something, the smallest unit had to be a
-single term. You can find only terms that exist in the inverted index.
+Standard full-text search with TF/IDF treats documents, or at least each field
+within a document, as a big _bag of words_.((("proximity matching")))  The `match` query can tell us whether
+that bag contains our search terms, but that is only part of the story.
+It can't tell us anything about the relationship between words.
 
-But what happens if you want to match parts of a term but not the whole thing?
-_Partial matching_ allows users to specify a portion of the term they are
-looking for and find any words that contain that fragment.
+Consider the difference between these sentences:
 
-The requirement to match on part of a term is less common in the full-text
-search-engine world than you might think.  If you have come from an SQL
-background, you likely have, at some stage of your career,
-implemented a _poor man's full-text search_ using SQL constructs like this:
+* Sue ate the alligator.
+* The alligator ate Sue.
+* Sue never goes anywhere without her alligator-skin purse.
 
-[source,js]
---------------------------------------------------
-    WHERE text LIKE "%quick%"
-      AND text LIKE "%brown%"
-      AND text LIKE "%fox%" <1>
---------------------------------------------------
+A `match` query for `sue alligator` would match all three documents, but it
+doesn't tell us whether the two words form part of the same idea, or even the same
+paragraph.
 
-<1> `*fox*` would match ``fox'' and ``foxes.''
+Understanding how words relate to each other is a complicated problem, and
+we can't solve it by just using another type of query,
+but we can at least find words that appear to be related because they appear
+near each other or even right next to each other.
 
-Of course, with Elasticsearch, we have the analysis process and the inverted
-index that remove the need for such brute-force techniques. To handle the
-case of matching both ``fox'' and ``foxes,'' we could simply use a stemmer to
-index words in their root form.  There is no need to match partial terms.
+Each document may be much longer than the examples we have presented: `Sue`
+and `alligator` may be separated by paragraphs of other text. Perhaps we still
+want to return these documents in which the words are widely separated, but we
+want to give documents in which the words are close together a higher relevance
+score.
 
-That said, on some occasions partial matching can be useful.
-Common use ((("partial matching", "common use cases")))cases include the following:
+This is the province of _phrase matching_, or _proximity matching_.
 
-* Matching postal codes, product serial numbers, or other `not_analyzed` values
-  that start with a particular prefix or match a wildcard pattern
-  or even a regular expression
+[TIP]
+==================================================
 
-* _search-as-you-type_&#x2014;displaying the most likely results before the
-  user has finished typing the search terms
+In this chapter, we are using the same example documents that we used for
+the <<match-test-data,`match` query>>.
 
-* Matching in languages like German or Dutch, which contain long compound
-  words, like _Weltgesundheitsorganisation_ (World Health Organization)
-
-We will start by examining prefix matching on exact-value `not_analyzed`
-fields.
+==================================================
