@@ -1,25 +1,36 @@
-[[distributed-docs]]
-== Distributed Document Store
+[[distributed-cluster]]
+== Life Inside a Cluster
 
-In the preceding chapter, we looked at all the ways to put data into your index and
-then retrieve it.  But we glossed over many technical details surrounding how
-the data is distributed and fetched from the cluster.  This separation is done
-on purpose; you don't really need to know how data is distributed to work
-with Elasticsearch.  It just works.
-
-In this chapter, we dive into those internal, technical details
-to help you understand how your data is stored in a distributed system.
-
-.Content Warning
+.Supplemental Chapter
 ****
 
-The information presented in this chapter is for your interest. You are not required to
-understand and remember all the detail in order to use Elasticsearch. The
-options that are discussed are for advanced users only.
+As mentioned earlier, this is the first of several supplemental chapters
+about how Elasticsearch operates in a distributed((("clusters"))) environment.  In this
+chapter, we explain commonly used terminology like _cluster_, _node_, and
+_shard_, the mechanics of how Elasticsearch scales out, and how it deals with
+hardware failure.
 
-Read the section to gain a taste for how things work, and to know where the
-information is in case you need to refer to it in the future, but don't be
-overwhelmed by the details.
+Although this chapter is not required reading--you can use Elasticsearch for
+a long time without worrying about shards, replication, and failover--it will
+help you to understand the processes at work inside Elasticsearch. Feel free
+to skim through the chapter and to refer to it again later.
 
 ****
 
+Elasticsearch is built to be ((("scalability, Elasticsearch and")))always available, and to scale with your needs.
+Scale can come from buying bigger ((("vertical scaling, Elasticsearch and")))servers (_vertical scale_, or _scaling up_)
+or from buying more ((("horizontal scaling, Elasticsearch and")))servers (_horizontal scale_, or _scaling out_).
+
+While Elasticsearch can benefit from more-powerful hardware, vertical scale
+has its limits. Real scalability comes from horizontal scale--the ability to
+add more nodes to the cluster and to spread load and reliability between them.
+
+With most databases, scaling horizontally usually requires a major overhaul of
+your application to take advantage of these extra boxes. In contrast,
+Elasticsearch is _distributed_ by nature: it knows how to manage multiple
+nodes to provide scale and high availability.  This also means that your
+application doesn't need to care about it.
+
+In this chapter, we show how you can set up your cluster,
+nodes, and shards to scale with your needs and to ensure that your data is
+safe from hardware failure.
