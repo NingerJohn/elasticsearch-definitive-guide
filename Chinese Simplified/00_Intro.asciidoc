@@ -1,41 +1,60 @@
-[[language-intro]]
-== Getting Started with Languages
+[[search]]
+== Searching--The Basic Tools
 
-Elasticsearch ships with a collection of language analyzers that provide
-good, basic, {ref}/analysis-lang-analyzer.html[out-of-the-box support]
-for many of the world's most common languages.
+So far, we have learned how to use Elasticsearch as a simple NoSQL-style
+distributed document store. We can ((("searching")))throw JSON documents at Elasticsearch and
+retrieve each one by ID. But the real power of Elasticsearch lies in its
+ability to make sense out of chaos -- to turn Big Data into Big Information.
 
-These analyzers typically perform four roles:
+This is the reason that we use structured JSON documents, rather than
+amorphous blobs of data.  Elasticsearch not only _stores_ the document, but
+also _indexes_ the content of the document in order to make it searchable.
 
-* Tokenize text into individual words:
-+
-`The quick brown foxes` -> [`The`, `quick`, `brown`, `foxes`]
+_Every field in a document is indexed and can be queried_. ((("indexing"))) And it's not just
+that. During a single query, Elasticsearch can use _all_ of these indices, to
+return results at breath-taking speed.  That's something that you could never
+consider doing with a traditional database.
 
-* Lowercase tokens:
-+
-`The` -> `the`
+A _search_ can be any of the following:
 
-* Remove common _stopwords_:
-+
-&#91;`The`, `quick`, `brown`, `foxes`] -> [`quick`, `brown`, `foxes`]
+* A structured query on concrete fields((("fields", "searching on")))((("searching", "types of searches"))) like `gender` or `age`, sorted by
+  a field like `join_date`, similar to the type of query that you could construct 
+  in SQL
 
-* Stem tokens to their root form:
-+
-`foxes` -> `fox`
+* A full-text query, which finds all documents matching the search keywords,
+  and returns them sorted by _relevance_
 
-Each analyzer may also apply other transformations specific to its language in
-order to make words from that language more searchable:
+* A combination of the two
 
-* The `english` analyzer removes the possessive `'s`:
-+
-`John's` -> `john`
+While many searches will just work out of((("full text search"))) the box, to use Elasticsearch to
+its full potential, you need to understand three subjects:
 
-* The `french` analyzer removes _elisions_ like `l'` and `qu'` and
-  _diacritics_ like `¨` or `^`:
-+
-`l'église` -> `eglis`
+ _Mapping_::     
+   How the data in each field is interpreted
+   
+ _Analysis_::    
+   How full text is processed to make it searchable
+   
+ _Query DSL_::   
+   The flexible, powerful query language used by Elasticsearch
 
-* The `german` analyzer normalizes terms, replacing `ä` and `ae` with `a`, or
-  `ß` with `ss`, among others:
-+
-`äußerst` -> `ausserst`
+Each of these is a big subject in its own right, and we explain them in
+detail in <<search-in-depth>>. The chapters in this section introduce the
+basic concepts of all three--just enough to help you to get an overall
+understanding of how search works.
+
+We will start by explaining the `search` API in its simplest form.
+
+.Test Data
+
+****
+
+The documents that we will use for test purposes in this chapter can be found
+in this gist: https://gist.github.com/clintongormley/8579281.
+
+You can copy the commands and paste them into your shell in order to follow
+along with this chapter.
+
+Alternatively, if you're in the online version of this book, you can link:sense_widget.html?snippets/050_Search/Test_data.json[click here to open in Sense].
+
+****
