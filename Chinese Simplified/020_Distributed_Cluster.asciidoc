@@ -1,0 +1,10 @@
+
+include=020_Distributed_Cluster/35_Coping_with_failure.asciidoc[]
+
+
+
+
+
+
+
+
