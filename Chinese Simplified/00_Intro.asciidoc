@@ -1,54 +1,34 @@
-[[data-in-data-out]]
-== Data In, Data Out
+[[distributed-search]]
+== Distributed Search Execution
 
-Whatever program we write, the intention is the same: to organize data in a
-way that serves our purposes.  But data doesn't consist of just random bits
-and bytes.  We build relationships between data elements in order to represent
-entities, or _things_ that exist in the real world.  A name and an email
-address have more meaning if we know that they belong to the same person.
+Before moving on, we are going to take a detour and talk about how search is
+executed in a distributed environment.((("distributed search execution")))  It is a bit more complicated than the
+basic _create-read-update-delete_ (CRUD) requests((("CRUD (create-read-update-delete) operations"))) that we discussed in
+<<distributed-docs>>.
 
-In the real world, though, not all entities of the same type look the same.
-One person might have a home telephone number, while another person has only a
-cell-phone number, and another might have both.  One person might have three
-email addresses, while another has none. A Spanish person will probably have
-two last names, while an English person will probably have only one.
+.Content Warning
+****
 
-One of the reasons that object-oriented programming languages are so popular
-is that objects help us represent and manipulate real-world entities with
-potentially complex data structures. So far, so good.
+The information presented in this chapter is for your interest. You are not required to
+understand and remember all the detail in order to use Elasticsearch.
 
-The problem comes when we need to store these entities. Traditionally, we have
-stored our data in columns and rows in a relational database, the equivalent
-of using a spreadsheet.  All the flexibility gained from using objects is lost
-because of the inflexibility of our storage medium.
+Read this chapter to gain a taste for how things work, and to know where the
+information is in case you need to refer to it in the future, but don't be
+overwhelmed by the detail.
 
-But what if we could store our objects as objects?((("objects", "storing as objects")))  Instead of modeling our
-application around the limitations of spreadsheets, we can instead focus on _using_ the data. The flexibility of objects is returned to us.
+****
 
-An _object_ is a language-specific, in-memory data structure.((("objects", "defined"))) To send it across
-the network or store it, we need to be able to represent it in some standard
-format. http://en.wikipedia.org/wiki/Json[JSON]
-is a way of representing objects in human-readable text.((("objects", "represented by JSON")))((("JSON", "representing objects in human-readable text")))((("JavaScript Object Notation", see="JSON")))  It has become the
-de facto standard for exchanging data in the NoSQL world. When an object has
-been serialized into JSON, it is known as a _JSON document_.((("JSON documents")))
+A CRUD operation deals with a single document that has a unique combination of
+`_index`, `_type`, and <<routing-value,`routing` values>> (which defaults to the
+document's `_id`). This means that we know exactly which shard in the cluster
+holds that document.
 
-Elasticsearch is a distributed _document_ store.((("document store, Elasticsearch as"))) It can store and retrieve
-complex data structures--serialized as JSON documents--in _real time_. In
-other words, as soon as a document has been stored in Elasticsearch, it can be
-retrieved from any node in the cluster.
+Search requires a more complicated execution model because we don't know which
+documents will match the query: they could be on any shard in the cluster. A
+search request has to consult a copy of every shard in the index or indices
+we're interested in to see if they have any matching documents.
 
-Of course, we don't need to only store data; we must also query it, en masse
-and at speed. While NoSQL solutions exist that allow us to store
-objects as documents, they still require us to think about how we want to
-query our data, and which fields require an index in order to make data
-retrieval fast.
-
-In Elasticsearch, _all data in every field_ is _indexed by default_.((("indexing", "in Elasticsearch"))) That is,
-every field has a dedicated inverted index for fast retrieval. And, unlike
-most other databases, it can use all of those inverted indices _in the same
-query_, to return results at breathtaking speed.
-
-In this chapter, we present the APIs that we use to create, retrieve,
-update, and delete documents. For the moment, we don't care about the data
-inside our documents or how to query them. All we care about is how to store our
-documents safely in Elasticsearch and how to get them back again.
+But finding all matching documents is only half the story. Results from
+multiple shards must be combined into a single sorted list before the `search`
+API can return a ``page'' of results. For this reason, search is executed in a
+two-phase process called _query then fetch_.
